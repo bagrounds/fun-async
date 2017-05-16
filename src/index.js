@@ -25,7 +25,7 @@
 
   /**
    *
-   * @function module:fun-async.contramap
+   * @function module:fun-async.dimap
    *
    * @param {Function} f - a -> b
    * @param {Function} g - c -> d
@@ -108,7 +108,7 @@
    *
    * @function module:fun-async.id
    *
-   * @param {Function} input - to pass along
+   * @param {*} input - to pass along
    * @param {Function} callback - handle results
    */
   function id (input, callback) {
@@ -119,7 +119,7 @@
    *
    * @function module:fun-async.k
    *
-   * @param {Function} value - to return
+   * @param {*} value - to return
    *
    * @return {Function} inputs -> callback -> undefined
    */
@@ -133,7 +133,7 @@
    *
    * @function module:fun-async.composeAll
    *
-   * @param {[Function]} fs - inputs -> callback -> undefined
+   * @param {Array<Function>} fs - inputs -> callback -> undefined
    *
    * @return {Function} inputs -> callback -> undefined
    */
@@ -145,7 +145,7 @@
    *
    * @function module:fun-async.pipeAll
    *
-   * @param {[Function]} fs - inputs -> callback -> undefined
+   * @param {Array<Function>} fs - inputs -> callback -> undefined
    *
    * @return {Function} inputs -> callback -> undefined
    */
