@@ -1,0 +1,54 @@
+{
+  "name": "fun-async",
+  "version": "0.1.0",
+  "description": "Functions for working with async functions functionally",
+  "main": "src/index.js",
+  "browser": "dist/bundle.js",
+  "scripts": {
+    "pretest": "npm run lint",
+    "test": "tap -Rtap --coverage-report=text-summary ./test/index.js",
+    "coverage": "tap --coverage-report=lcov ./test/index.js",
+    "predependencies": "mkdir -p img",
+    "dependencies": "madge src --image img/dependencies.svg -x 'public|test|coverage|docs' --include-npm",
+    "postdependencies": "npm run dependencies-test",
+    "dependencies-test": "madge . --image img/dependencies-test.svg -x 'dist|public|coverage|docs' --include-npm",
+    "pages-index": "showdown makehtml -i README.md -o public/index.html",
+    "pages": "./script/pages.sh",
+    "lint": "eslint --ignore-path .gitignore --fix . --ignore-pattern dist",
+    "predocument": "rm -rf docs",
+    "document": "jsdoc -c .jsdoc.json",
+    "browserify": "browserify dist/entry.js --no-bf | uglifyjs > dist/bundle.js",
+    "readme": "cat readme/* > README.md",
+    "next-update": "next-update -k true --tldr"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/bagrounds/fun-async.git"
+  },
+  "author": "bagrounds@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/bagrounds/fun-async/issues"
+  },
+  "homepage": "https://gitlab.com/bagrounds/fun-async#README",
+  "devDependencies": {
+    "browserify": "^14.3.0",
+    "docdash": "^0.4.0",
+    "eslint": "4.0.0-alpha.2",
+    "fun-arrange": "^0.1.4",
+    "fun-object": "0.6.3",
+    "fun-predicate": "0.16.0",
+    "fun-scalar": "^0.4.0",
+    "fun-test": "0.23.0",
+    "fun-test-runner": "0.8.2",
+    "jsdoc": "^3.4.3",
+    "madge": "^1.6.0",
+    "next-update": "^1.5.1",
+    "tap": "10.3.2",
+    "uglify-js": "3.0.5"
+  },
+  "dependencies": {
+    "fun-array": "^0.8.0",
+    "fun-function": "^0.9.1"
+  }
+}

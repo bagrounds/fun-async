@@ -1,0 +1,2 @@
+funAsync = require('../src')
+
