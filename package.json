@@ -39,13 +39,13 @@
     "fun-object": "0.6.3",
     "fun-predicate": "0.16.0",
     "fun-scalar": "^0.4.0",
-    "fun-test": "0.23.0",
-    "fun-test-runner": "0.8.2",
+    "fun-test": "^0.24.1",
+    "fun-test-runner": "^0.9.1",
     "jsdoc": "^3.4.3",
     "madge": "^1.6.0",
     "next-update": "^1.5.1",
     "tap": "10.3.2",
-    "uglify-js": "3.0.5"
+    "uglify-js": "3.0.8"
   },
   "dependencies": {
     "fun-array": "^0.8.0",
