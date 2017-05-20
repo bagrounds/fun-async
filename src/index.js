@@ -20,7 +20,31 @@
     pipeAll: pipeAll,
     map: fn.curry(map),
     contramap: fn.curry(contramap),
-    dimap: fn.curry(dimap)
+    dimap: fn.curry(dimap),
+    traverse: fn.curry(traverse)
+  }
+
+  /**
+   *
+   * @function module:fun-async.traverse
+   *
+   * @param {Function} asyncF - inputs -> callback -> undefined
+   * @param {Array<Array>} inputs - array of arrays of inputs to traverse
+   * @param {Function} callback - handle results
+   */
+  function traverse (asyncF, inputs, callback) {
+    var count = 0
+
+    inputs.map(fn.id).forEach(function (args, i, results) {
+      fn.apply(args.concat([cb]), asyncF)
+
+      function cb () {
+        results[i] = array.from(arguments)
+        if (++count === inputs.length) {
+          callback(null, results)
+        }
+      }
+    })
   }
 
   /**

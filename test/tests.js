@@ -25,6 +25,15 @@
   /* exports */
   module.exports = [
     [
+      [asyncDouble, [1, 2, 3].map(array.of)],
+      fn.composeAll([
+        predicate.equalDeep([2, 4, 6]),
+        array.map(array.get(1)),
+        array.get(1)
+      ]),
+      object.get('traverse')
+    ],
+    [
       [3],
       fn.compose(predicate.type('Error'), array.get(0)),
       fn.compose(
