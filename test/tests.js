@@ -25,7 +25,7 @@
   /* exports */
   module.exports = [
     [
-      [asyncDouble, [1, 2, 3].map(array.of)],
+      [asyncDouble, array.map(array.of, [1, 2, 3])],
       fn.composeAll([
         predicate.equalDeep([2, 4, 6]),
         array.map(array.get(1)),
