@@ -37,7 +37,7 @@
       [3],
       fn.compose(predicate.type('Error'), array.get(0)),
       fn.compose(
-        fn.apply([scalar.sum(1), scalar.sum(1), asyncError]),
+        fn.apply([scalar.add(1), scalar.add(1), asyncError]),
         object.get('dimap')
       )
     ],
@@ -45,32 +45,32 @@
       [3],
       fn.compose(predicate.equal(9), array.get(1)),
       fn.compose(
-        fn.apply([scalar.sum(1), scalar.sum(1), asyncDouble]),
+        fn.apply([scalar.add(1), scalar.add(1), asyncDouble]),
         object.get('dimap')
       )
     ],
     [
       [3],
       fn.compose(predicate.type('Error'), array.get(0)),
-      fn.compose(fn.apply([scalar.sum(1), asyncError]), object.get('contramap'))
+      fn.compose(fn.apply([scalar.add(1), asyncError]), object.get('contramap'))
     ],
     [
       [3],
       fn.compose(predicate.equal(8), array.get(1)),
       fn.compose(
-        fn.apply([scalar.sum(1), asyncDouble]),
+        fn.apply([scalar.add(1), asyncDouble]),
         object.get('contramap')
       )
     ],
     [
       [3],
       fn.compose(predicate.type('Error'), array.get(0)),
-      fn.compose(fn.apply([scalar.sum(1), asyncError]), object.get('map'))
+      fn.compose(fn.apply([scalar.add(1), asyncError]), object.get('map'))
     ],
     [
       [3],
       fn.compose(predicate.equal(7), array.get(1)),
-      fn.compose(fn.apply([scalar.sum(1), asyncDouble]), object.get('map'))
+      fn.compose(fn.apply([scalar.add(1), asyncDouble]), object.get('map'))
     ],
     [
       [3],
@@ -138,7 +138,7 @@
     [
       [3],
       fn.compose(predicate.equal(4), array.get(1)),
-      fn.compose(fn.apply([scalar.sum(1)]), object.get('of'))
+      fn.compose(fn.apply([scalar.add(1)]), object.get('of'))
     ],
     [
       [null],
