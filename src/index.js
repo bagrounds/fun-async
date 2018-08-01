@@ -2,12 +2,164 @@
  *
  * @module fun-async
  */
-;(function () {
+;(() => {
   'use strict'
 
   /* imports */
-  var array = require('fun-array')
-  var fn = require('fun-function')
+  const { append, take, from, last } = require('fun-array')
+  const fn = require('fun-function')
+
+  /**
+   *
+   * @function module:fun-async.traverse
+   *
+   * @param {Function} asyncF - inputs -> callback -> undefined
+   * @param {Array<Array>} inputs - array of arrays of inputs to traverse
+   * @param {Function} callback - handle results
+   *
+   * @return undefined
+   */
+  const traverse = (asyncF, inputs, callback) =>
+    inputs.map(fn.id).forEach((args, i, results) =>
+      fn.apply(
+        append(
+          (...args) => {
+            results[i] = args
+            if (i + 1 === inputs.length) {
+              callback(null, results)
+            }
+          },
+          args
+        ),
+        asyncF
+      )
+    )
+
+  /**
+   *
+   * @function module:fun-async.dimap
+   *
+   * @param {Function} f - a -> b
+   * @param {Function} g - c -> d
+   * @param {Function} asyncF - inputs -> callback -> undefined
+   *
+   * @return {Function} inputs -> callback -> undefined
+   */
+  const dimap = (f, g, asyncF) => (input, cb) =>
+    asyncF(
+      f(input),
+      (error, result) => error ? cb(error) : cb(null, g(result))
+    )
+
+  /**
+   *
+   * @function module:fun-async.contramap
+   *
+   * @param {Function} f - a -> b
+   * @param {Function} asyncF - inputs -> callback -> undefined
+   *
+   * @return {Function} inputs -> callback -> undefined
+   */
+  const contramap = (f, asyncF) => (input, cb) =>
+    asyncF(
+      f(input),
+      (error, result) => error ? cb(error) : cb(null, result)
+    )
+
+  /**
+   *
+   * @function module:fun-async.map
+   *
+   * @param {Function} f - a -> b
+   * @param {Function} asyncF - inputs -> callback -> undefined
+   *
+   * @return {Function} inputs -> callback -> undefined
+   */
+  const map = (f, asyncF) => (...args) =>
+    (cb => applyArgsWithCallback(
+      args,
+      (error, result) => error ? cb(error) : cb(null, f(result))
+    )(asyncF))(last(args))
+
+  /**
+   *
+   * @function module:fun-async.of
+   *
+   * @param {Function} f - a -> b
+   *
+   * @return {Function} inputs -> callback -> undefined
+   */
+  const of = f => (inputs, callback) => callback(null, f(inputs))
+
+  /**
+   *
+   * @function module:fun-async.id
+   *
+   * @param {*} input - to pass along
+   * @param {Function} callback - handle results
+   *
+   * @return undefined
+   */
+  const id = (input, callback) => callback(null, input)
+
+  /**
+   *
+   * @function module:fun-async.k
+   *
+   * @param {*} value - to return
+   *
+   * @return {Function} inputs -> callback -> undefined
+   */
+  const k = value => (...args) => last(args)(null, value)
+
+  /**
+   *
+   * @function module:fun-async.composeAll
+   *
+   * @param {Array<Function>} fs - inputs -> callback -> undefined
+   *
+   * @return {Function} inputs -> callback -> undefined
+   */
+  const composeAll = fs => fs.reduce(compose, id)
+
+  /**
+   *
+   * @function module:fun-async.pipeAll
+   *
+   * @param {Array<Function>} fs - inputs -> callback -> undefined
+   *
+   * @return {Function} inputs -> callback -> undefined
+   */
+  const pipeAll = fs => fs.reduce(pipe, id)
+
+  /**
+   *
+   * @function module:fun-async.pipe
+   *
+   * @param {Function} f - inputs -> callback -> undefined
+   * @param {Function} g - inputs -> callback -> undefined
+   *
+   * @return {Function} inputs -> callback -> undefined
+   */
+  const pipe = (f, g) => compose(g, f)
+
+  /**
+   *
+   * @function module:fun-async.compose
+   *
+   * @param {Function} f - inputs -> callback -> undefined
+   * @param {Function} g - inputs -> callback -> undefined
+   *
+   * @return {Function} inputs -> callback -> undefined
+   */
+  const compose = (f, g) => (...args) =>
+    (cb => applyArgsWithCallback(
+      args,
+      (error, result) => error ? cb(error) : f(result, cb)
+    )(g))(last(args))
+
+  const applyArgsWithCallback = (args, callback) =>
+    fn.apply(append(callback, take(-1, from(args))))
 
   /* exports */
   module.exports = {
@@ -22,200 +174,6 @@
     contramap: fn.curry(contramap),
     dimap: fn.curry(dimap),
     traverse: fn.curry(traverse)
-  }
-
-  /**
-   *
-   * @function module:fun-async.traverse
-   *
-   * @param {Function} asyncF - inputs -> callback -> undefined
-   * @param {Array<Array>} inputs - array of arrays of inputs to traverse
-   * @param {Function} callback - handle results
-   */
-  function traverse (asyncF, inputs, callback) {
-    var count = 0
-
-    inputs.map(fn.id).forEach(function (args, i, results) {
-      fn.apply(args.concat([cb]), asyncF)
-
-      function cb () {
-        results[i] = array.from(arguments)
-        if (++count === inputs.length) {
-          callback(null, results)
-        }
-      }
-    })
-  }
-
-  /**
-   *
-   * @function module:fun-async.dimap
-   *
-   * @param {Function} f - a -> b
-   * @param {Function} g - c -> d
-   * @param {Function} asyncF - inputs -> callback -> undefined
-   *
-   * @return {Function} inputs -> callback -> undefined
-   */
-  function dimap (f, g, asyncF) {
-    return function (input, cb) {
-      asyncF(f(input), function callback (error, result) {
-        if (error) {
-          cb(error)
-        } else {
-          cb(null, g(result))
-        }
-      })
-    }
-  }
-
-  /**
-   *
-   * @function module:fun-async.contramap
-   *
-   * @param {Function} f - a -> b
-   * @param {Function} asyncF - inputs -> callback -> undefined
-   *
-   * @return {Function} inputs -> callback -> undefined
-   */
-  function contramap (f, asyncF) {
-    return function (input, cb) {
-      asyncF(f(input), function callback (error, result) {
-        if (error) {
-          cb(error)
-        } else {
-          cb(null, result)
-        }
-      })
-    }
-  }
-
-  /**
-   *
-   * @function module:fun-async.map
-   *
-   * @param {Function} f - a -> b
-   * @param {Function} asyncF - inputs -> callback -> undefined
-   *
-   * @return {Function} inputs -> callback -> undefined
-   */
-  function map (f, asyncF) {
-    return function () {
-      var cb = array.last(array.from(arguments))
-      applyArgsWithCallback(arguments, callback)(asyncF)
-
-      function callback (error, result) {
-        if (error) {
-          cb(error)
-        } else {
-          cb(null, f(result))
-        }
-      }
-    }
-  }
-
-  /**
-   *
-   * @function module:fun-async.of
-   *
-   * @param {Function} f - a -> b
-   *
-   * @return {Function} inputs -> callback -> undefined
-   */
-  function of (f) {
-    return function (inputs, callback) {
-      callback(null, f(inputs))
-    }
-  }
-
-  /**
-   *
-   * @function module:fun-async.id
-   *
-   * @param {*} input - to pass along
-   * @param {Function} callback - handle results
-   */
-  function id (input, callback) {
-    callback(null, input)
-  }
-
-  /**
-   *
-   * @function module:fun-async.k
-   *
-   * @param {*} value - to return
-   *
-   * @return {Function} inputs -> callback -> undefined
-   */
-  function k (value) {
-    return function () {
-      array.last(array.from(arguments))(null, value)
-    }
-  }
-
-  /**
-   *
-   * @function module:fun-async.composeAll
-   *
-   * @param {Array<Function>} fs - inputs -> callback -> undefined
-   *
-   * @return {Function} inputs -> callback -> undefined
-   */
-  function composeAll (fs) {
-    return fs.reduce(compose, id)
-  }
-
-  /**
-   *
-   * @function module:fun-async.pipeAll
-   *
-   * @param {Array<Function>} fs - inputs -> callback -> undefined
-   *
-   * @return {Function} inputs -> callback -> undefined
-   */
-  function pipeAll (fs) {
-    return fs.reduce(pipe, id)
-  }
-
-  /**
-   *
-   * @function module:fun-async.pipe
-   *
-   * @param {Function} f - inputs -> callback -> undefined
-   * @param {Function} g - inputs -> callback -> undefined
-   *
-   * @return {Function} inputs -> callback -> undefined
-   */
-  function pipe (f, g) {
-    return compose(g, f)
-  }
-
-  /**
-   *
-   * @function module:fun-async.compose
-   *
-   * @param {Function} f - inputs -> callback -> undefined
-   * @param {Function} g - inputs -> callback -> undefined
-   *
-   * @return {Function} inputs -> callback -> undefined
-   */
-  function compose (f, g) {
-    return function () {
-      var cb = array.last(array.from(arguments))
-      applyArgsWithCallback(arguments, callback)(g)
-
-      function callback (error, result) {
-        if (error) {
-          cb(error)
-        } else {
-          f(result, cb)
-        }
-      }
-    }
-  }
-
-  function applyArgsWithCallback (args, callback) {
-    return fn.apply(array.append(callback, array.take(-1, array.from(args))))
   }
 })()
 

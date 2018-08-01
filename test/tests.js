@@ -1,155 +1,164 @@
-;(function () {
+;(() => {
   'use strict'
 
   /* imports */
-  var scalar = require('fun-scalar')
-  var fn = require('fun-function')
-  var object = require('fun-object')
-  var arrange = require('fun-arrange')
-  var predicate = require('fun-predicate')
-  var array = require('fun-array')
-  var funTest = require('fun-test')
+  const { add } = require('fun-scalar')
+  const { apply, compose, composeAll } = require('fun-function')
+  const arrange = require('fun-arrange')
+  const { equal, equalDeep } = require('fun-predicate')
+  const { map, of } = require('fun-array')
+  const { async } = require('fun-test')
+  const { get } = require('fun-lens')
+  const { instanceOf } = require('fun-type')
 
-  function asyncError (a, callback) {
-    callback(Error('!!'))
-  }
+  const get1 = x => get([x])
 
-  function asyncDouble (a, callback) {
-    callback(null, a * 2)
-  }
-
-  function asyncAdd1 (a, callback) {
-    callback(null, a + 1)
-  }
+  const asyncError = (a, callback) => callback(Error('!!'))
+  const asyncDouble = (a, callback) => callback(null, a * 2)
+  const asyncAdd1 = (a, callback) => callback(null, a + 1)
 
   /* exports */
-  module.exports = [
+  module.exports = map(
+    compose(
+      async,
+      arrange({ inputs: 0, predicate: 1, contra: 2 })
+    ),
     [
-      [asyncDouble, array.map(array.of, [1, 2, 3])],
-      fn.composeAll([
-        predicate.equalDeep([2, 4, 6]),
-        array.map(array.get(1)),
-        array.get(1)
-      ]),
-      object.get('traverse')
-    ],
-    [
-      [3],
-      fn.compose(predicate.type('Error'), array.get(0)),
-      fn.compose(
-        fn.apply([scalar.add(1), scalar.add(1), asyncError]),
-        object.get('dimap')
-      )
-    ],
-    [
-      [3],
-      fn.compose(predicate.equal(9), array.get(1)),
-      fn.compose(
-        fn.apply([scalar.add(1), scalar.add(1), asyncDouble]),
-        object.get('dimap')
-      )
-    ],
-    [
-      [3],
-      fn.compose(predicate.type('Error'), array.get(0)),
-      fn.compose(fn.apply([scalar.add(1), asyncError]), object.get('contramap'))
-    ],
-    [
-      [3],
-      fn.compose(predicate.equal(8), array.get(1)),
-      fn.compose(
-        fn.apply([scalar.add(1), asyncDouble]),
-        object.get('contramap')
-      )
-    ],
-    [
-      [3],
-      fn.compose(predicate.type('Error'), array.get(0)),
-      fn.compose(fn.apply([scalar.add(1), asyncError]), object.get('map'))
-    ],
-    [
-      [3],
-      fn.compose(predicate.equal(7), array.get(1)),
-      fn.compose(fn.apply([scalar.add(1), asyncDouble]), object.get('map'))
-    ],
-    [
-      [3],
-      fn.compose(predicate.type('Error'), array.get(0)),
-      fn.compose(fn.apply([[asyncError, asyncDouble]]), object.get('pipeAll'))
-    ],
-    [
-      [3],
-      fn.compose(predicate.type('Error'), array.get(0)),
-      fn.compose(fn.apply([[asyncAdd1, asyncError]]), object.get('pipeAll'))
-    ],
-    [
-      [3],
-      fn.compose(predicate.equal(8), array.get(1)),
-      fn.compose(fn.apply([[asyncAdd1, asyncDouble]]), object.get('pipeAll'))
-    ],
-    [
-      [3],
-      fn.compose(predicate.type('Error'), array.get(0)),
-      fn.compose(fn.apply([asyncError, asyncDouble]), object.get('pipe'))
-    ],
-    [
-      [3],
-      fn.compose(predicate.type('Error'), array.get(0)),
-      fn.compose(fn.apply([asyncAdd1, asyncError]), object.get('pipe'))
-    ],
-    [
-      [3],
-      fn.compose(predicate.equal(8), array.get(1)),
-      fn.compose(fn.apply([asyncAdd1, asyncDouble]), object.get('pipe'))
-    ],
-    [
-      [3],
-      fn.compose(predicate.type('Error'), array.get(0)),
-      fn.compose(
-        fn.apply([[asyncError, asyncDouble]]),
-        object.get('composeAll')
-      )
-    ],
-    [
-      [3],
-      fn.compose(predicate.type('Error'), array.get(0)),
-      fn.compose(fn.apply([[asyncAdd1, asyncError]]), object.get('composeAll'))
-    ],
-    [
-      [3],
-      fn.compose(predicate.equal(7), array.get(1)),
-      fn.compose(fn.apply([[asyncAdd1, asyncDouble]]), object.get('composeAll'))
-    ],
-    [
-      [3],
-      fn.compose(predicate.type('Error'), array.get(0)),
-      fn.compose(fn.apply([asyncError, asyncDouble]), object.get('compose'))
-    ],
-    [
-      [3],
-      fn.compose(predicate.type('Error'), array.get(0)),
-      fn.compose(fn.apply([asyncAdd1, asyncError]), object.get('compose'))
-    ],
-    [
-      [3],
-      fn.compose(predicate.equal(7), array.get(1)),
-      fn.compose(fn.apply([asyncAdd1, asyncDouble]), object.get('compose'))
-    ],
-    [
-      [3],
-      fn.compose(predicate.equal(4), array.get(1)),
-      fn.compose(fn.apply([scalar.add(1)]), object.get('of'))
-    ],
-    [
-      [null],
-      fn.compose(predicate.equal(3), array.get(1)),
-      fn.compose(fn.apply([3]), object.get('k'))
-    ],
-    [
-      [6],
-      fn.compose(predicate.equal(6), array.get(1)),
-      object.get('id')
-    ]
-  ].map(arrange({ inputs: 0, predicate: 1, contra: 2 })).map(funTest.async)
+      [
+        [asyncDouble, map(of, [1, 2, 3])],
+        composeAll([
+          equalDeep([2, 4, 6]),
+          map(get1(1)),
+          get1(1)
+        ]),
+        get1('traverse')
+      ],
+      [
+        [asyncDouble, map(of, [1, 2, 3])],
+        composeAll([
+          equalDeep([2, 4, 6]),
+          map(get1(1)),
+          get1(1)
+        ]),
+        get1('traverse')
+      ],
+      [
+        [3],
+        compose(instanceOf(Error), get1(0)),
+        compose(
+          apply([add(1), add(1), asyncError]),
+          get1('dimap')
+        )
+      ],
+      [
+        [3],
+        compose(equal(9), get1(1)),
+        compose(
+          apply([add(1), add(1), asyncDouble]),
+          get1('dimap')
+        )
+      ],
+      [
+        [3],
+        compose(instanceOf(Error), get1(0)),
+        compose(apply([add(1), asyncError]), get1('contramap'))
+      ],
+      [
+        [3],
+        compose(equal(8), get1(1)),
+        compose(
+          apply([add(1), asyncDouble]),
+          get1('contramap')
+        )
+      ],
+      [
+        [3],
+        compose(instanceOf(Error), get1(0)),
+        compose(apply([add(1), asyncError]), get1('map'))
+      ],
+      [
+        [3],
+        compose(equal(7), get1(1)),
+        compose(apply([add(1), asyncDouble]), get1('map'))
+      ],
+      [
+        [3],
+        compose(instanceOf(Error), get1(0)),
+        compose(apply([[asyncError, asyncDouble]]), get1('pipeAll'))
+      ],
+      [
+        [3],
+        compose(instanceOf(Error), get1(0)),
+        compose(apply([[asyncAdd1, asyncError]]), get1('pipeAll'))
+      ],
+      [
+        [3],
+        compose(equal(8), get1(1)),
+        compose(apply([[asyncAdd1, asyncDouble]]), get1('pipeAll'))
+      ],
+      [
+        [3],
+        compose(instanceOf(Error), get1(0)),
+        compose(apply([asyncError, asyncDouble]), get1('pipe'))
+      ],
+      [
+        [3],
+        compose(instanceOf(Error), get1(0)),
+        compose(apply([asyncAdd1, asyncError]), get1('pipe'))
+      ],
+      [
+        [3],
+        compose(equal(8), get1(1)),
+        compose(apply([asyncAdd1, asyncDouble]), get1('pipe'))
+      ],
+      [
+        [3],
+        compose(instanceOf(Error), get1(0)),
+        compose(
+          apply([[asyncError, asyncDouble]]),
+          get1('composeAll')
+        )
+      ],
+      [
+        [3],
+        compose(instanceOf(Error), get1(0)),
+        compose(apply([[asyncAdd1, asyncError]]), get1('composeAll'))
+      ],
+      [
+        [3],
+        compose(equal(7), get1(1)),
+        compose(apply([[asyncAdd1, asyncDouble]]), get1('composeAll'))
+      ],
+      [
+        [3],
+        compose(instanceOf(Error), get1(0)),
+        compose(apply([asyncError, asyncDouble]), get1('compose'))
+      ],
+      [
+        [3],
+        compose(instanceOf(Error), get1(0)),
+        compose(apply([asyncAdd1, asyncError]), get1('compose'))
+      ],
+      [
+        [3],
+        compose(equal(7), get1(1)),
+        compose(apply([asyncAdd1, asyncDouble]), get1('compose'))
+      ],
+      [
+        [3],
+        compose(equal(4), get1(1)),
+        compose(apply([add(1)]), get1('of'))
+      ],
+      [
+        [null],
+        compose(equal(3), get1(1)),
+        compose(apply([3]), get1('k'))
+      ],
+      [
+        [6],
+        compose(equal(6), get1(1)),
+        get1('id')
+      ]
+    ])
 })()
 
