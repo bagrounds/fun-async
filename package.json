@@ -1,6 +1,6 @@
 {
   "name": "fun-async",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Functions for working with async functions functionally",
   "main": "src/index.js",
   "browser": "dist/bundle.js",
